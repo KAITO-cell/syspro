@@ -50,28 +50,23 @@ int main(void){
         //send message
         
 
-        if((send_size = send(sockfd, send_buf,strlen(send_buf)+1,0)) == -1){
+        if((send_size = send(sockfd, send_buf,strlen(send_buf),0)) == -1){
             perror("send error");
             break;
         }
         //recieve response from server
        
-        if(( recv_size = recv(sockfd, &recv_buf,1,0))==-1){
-            printf("recv error\n");
+        if(( recv_size = recv(sockfd, &recv_buf,BUF_SIZE,0))==-1){
+            fprintf(stderr,"recv error\n");
             break;
         }else if(recv_size == 0){
-            printf("connection ended\n");
+            fprintf(stderr,"connection ended\n");
             break;
         } else {
-		printf("recv message: %s\n",recv_buf);
+		fprintf(stderr,"recv message: %s\n",recv_buf);
 
 	}
-
-        //finish send message if response is 0
-        if(recv_size==0){
-            printf("Finish connection");
-            break;
-        }
+	//break;
     }
 
     /* ソケット通信をクローズ *///socket discriptor close

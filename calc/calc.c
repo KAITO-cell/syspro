@@ -13,6 +13,23 @@ typedef struct {
 
 user_data u;
 
+Expression* make_expression(){
+	Expression expression;
+	int i=0;
+	for(i=0;i<10;i++){
+        	expression->left = 1 + rand() % 9;
+        	expression->right = 1 + rand() % 9;
+		expression->answer = left+right;
+		expression++;
+	}
+	return expression;
+}
+	
+
+
+
+}
+
 int main(void){
     srand((unsigned int)time(NULL));
     //簡単な問題(1問目:足し算,2問目:引き算,3問目:掛け算)
@@ -20,7 +37,7 @@ int main(void){
         u.easy_ope_1[i] = 1 + rand() % 9;
         u.easy_ope_2[i] = 1 + rand() % 9;
         if(i == 0){
-            u.easy_ans[i] = u.easy_ope_1[i] + u.easy_ope_2[i];
+            u.easy_ans[i] = u->easy_ope_1[i] + u.easy_ope_2[i];
         }
         if(i == 1){
             u.easy_ans[i] = u.easy_ope_1[i] - u.easy_ope_2[i];
