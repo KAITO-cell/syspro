@@ -8,45 +8,54 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
-
+#include <time.h>
+#include "calc.h"
+#include "server.h"
 #define PORT 8080
 #define IP_ADDR "127.0.0.1"
 #define BUF_SIZE 1024
 
+// typedef struct {
+// 	struct sockaddr_in addr;
+// 	int sockfd;
+// } socket_data;
+
+// socket_data set_server(){
+// 	socket_data server;
+// 	if( (server.sockfd = socket(PF_INET, SOCK_STREAM, 0)) < 0){
+// 		perror("socket error");
+// 		close(server.sockfd);
+// 		exit(EXIT_FAILURE);
+// 	}
+// 	memset(&server.addr, 0, sizeof(struct sockaddr_in));
+// 	server.addr.sin_family = PF_INET;
+// 	server.addr.sin_port = htons((unsigned short)PORT);
+// 	server.addr.sin_addr.s_addr = inet_addr(IP_ADDR);
+// 	if( bind(server.sockfd, (const struct sockaddr *)&server, sizeof(server))<0) {
+// 		perror("bind error\n");
+// 		close(server.sockfd);
+// 		exit(EXIT_FAILURE);
+// 	}
+
+// 	//set server listen
+// 	if( listen(server.sockfd, 4) < 0){
+// 		perror("listen error\n");
+// 		close(server.sockfd);
+// 		exit(EXIT_FAILURE);
+// 	}
+// 	return server;
+// }
 int main(int argc, char** argv){
-	struct sockaddr_in server_addr, client_addr;
-	int s_sockfd, c_sockfd, len;
+	////struct sockaddr_in server_addr, client_addr;
+	struct sockaddr_in client_addr;
+	socket_data server;
+	int c_sockfd;
 	int pid;
 	socklen_t sin_siz;
-	unsigned short s_port;
-	unsigned int c_port;
 	int recv_size, send_size;
 	char send_buf[BUF_SIZE], recv_buf[BUF_SIZE];
-	//open socket discripter
-	if( (s_sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0){
-		perror("sock error");
-		exit(EXIT_FAILURE);
-	}
-	memset(&server_addr, 0, sizeof(struct sockaddr_in));
-	//set server socket config
-	server_addr.sin_family = PF_INET;
-	server_addr.sin_port = htons((unsigned short)PORT);
-	server_addr.sin_addr.s_addr = inet_addr(IP_ADDR);
-	
-	//bind socket discriptor and server address config
-	if( bind(s_sockfd, (const struct sockaddr *)&server_addr, sizeof(server_addr))<0) {
-		perror("bind error\n");
-		close(s_sockfd);
-		exit(EXIT_FAILURE);
-	}
-
-	//set server listen
-	if( listen(s_sockfd, 4) < 0){
-		perror("listen error\n");
-		close(s_sockfd);
-		exit(EXIT_FAILURE);
-	}
-
+	server = set_server();
+			
 	//accept connection
 	//fork and copy process into child after connected
 	//close parent connection
@@ -54,98 +63,77 @@ int main(int argc, char** argv){
 	int *status;
 	while(1){
 		fprintf(stdout, "waiting connect...\n");
-		//while(1){
-
-		if((c_sockfd = accept(s_sockfd, (struct sockaddr *)&client_addr, &sin_siz))<0){
+		if((c_sockfd = accept(server.sockfd, (struct sockaddr *)&client_addr, &sin_siz))<0){
 			perror("accept\n");
-			close(s_sockfd);
+			close(server.sockfd);
 			close(c_sockfd);
 			exit(EXIT_FAILURE);
 		}
-	//	printf("connect from %s: %d\n",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
-	//	memset(recv_buf, 0, BUF_SIZE);
-
 		pid = fork();
 		//child close server socket
 		//parent close client socket
-		
 		if(pid==0){
 			fprintf(stderr, "child: pid=%d\nchild finish\n",pid);
 			//close server socketfd
-			close(s_sockfd);
+			close(server.sockfd);
 			printf("connect from %s: %d\n",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 			memset(recv_buf, 0, BUF_SIZE);
 			memset(send_buf, 0, BUF_SIZE);
-
 			
-			recv_size = recv(c_sockfd, recv_buf, BUF_SIZE, 0);
-			printf("server: recv message: %s\n",recv_buf);
-			while(strncasecmp(recv_buf, "exit\n", 5) != 0){
+			Question question;
+			Data d;
+			d.correct_label = 1;
+			char q_statement[1024];
+			int q_size;
+			q_size=sprintf( q_statement, "%d + %d = ?\n",question.left,question.right);
+			//fprintf(stderr,"%s\n",q_statement);
+			//recv_size = recv(c_sockfd, recv_buf, BUF_SIZE, 0);
+			//printf("server first: recv message: %s\n",recv_buf);
+			int state = 0;
+			while(strcmp(recv_buf, "finish") != 0){
+				fprintf(stderr,"wait for client\n");
+				//switch(state){
+					//case 0:
+						recv_size = recv(c_sockfd, recv_buf, BUF_SIZE, 0);
+						printf("server in while: recv message: %s\n",recv_buf);
+						if(recv_size == -1){
+							fprintf(stderr, "recv error\n");
+							perror("recv\n");
+							close(c_sockfd);
+							exit(EXIT_FAILURE);
+						}
+						if(recv_size == 0){
+							fprintf(stderr, "in while connection end\n");
+							close(c_sockfd);
+							break;
+						}
+						send_size = send(c_sockfd, q_statement, q_size, 0);
+						/*if(strcmp(recv_buf, "finish") == 0){
+							if( send_size == -1){
+								perror("send error\n");
+								close(c_sockfd);
+								break;
+							}
+							fprintf(stderr, "connection finish\n");
+							close(c_sockfd);
+							break;
+						}*/
+					//	break;
+					//}
+					//case 1:
 				//recv_size = recv(c_sockfd, recv_buf, BUF_SIZE, 0);
-			printf("server: recv message: %s\n",recv_buf);
-				if(recv_size == -1){
-					fprintf(stderr, "recv error\n");
-					perror("recv\n");
-					close(c_sockfd);
-					exit(EXIT_FAILURE);
-				}
-				if(recv_size == 0){
-					fprintf(stderr, "connection end\n");
-					close(c_sockfd);
-					break;
-				}
-				send_size = send(c_sockfd, recv_buf, recv_size, 0);
-				if(strcmp(recv_buf, "finish\n") == 0){
-				/*		
-				recv_buf[len] = '\0';
-				printf("<== %s\n", recv_buf);
-				send_size = send(c_sockfd, , len, 0);
-				*/
-					//send_size = send(c_sock, %send_buf, 1, 0);
-					if( send_size == -1){
-						perror("send error\n");
-						close(c_sockfd);
-						break;
-					}
-					fprintf(stderr, "connection finish\n");
-					close(c_sockfd);
-					break;
-				}
-				recv_size = recv(c_sockfd, recv_buf, BUF_SIZE, 0);
 			}
-
 			fprintf(stderr, "finish while recv send\n");
-		}else{
+		}else{//parent process
 			fprintf(stderr, "parent: pid=%d\n",pid);
 			close(c_sockfd);
-			//exit(0);
-			//fprintf(stderr, "parent: pid=%d\nparent finish",pid);
-			/*if((c_sockfd = accept(s_sockfd, (struct sockaddr *)&client_addr, &sin_siz))<0){
-				perror("accept\n");
-				close(s_sockfd);
-				close(c_sockfd);
-				exit(EXIT_FAILURE);
+			//wait(status);
+			//if(WIFEXITED(*status)) {
+			//	printf("Exit: %d\n", WEXITSTATUS(*status));
 			}
-			wait(status);
-			if(WIFEXITED(*status)) {
-				printf("Exit: %d\n", WEXITSTATUS(*status));
-			}*/
-			
 		}
-
-		/*printf("connect from %s: %d\n",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
-		memset(recv_buf, 0, BUF_SIZE);
-*/
-		/*while(strncasecmp(recv_buf, "exit\n", 5) != 0){
-			len = recv(c_sockfd, recv_buf, BUF_SIZE, 0);
-			recv_buf[len] = '\0';
-			printf("<== %s\n", recv_buf);
-			len = send(c_sockfd, recv_buf, len, 0);
-		}*/
-		//close(c_sockfd);
-		//}
 	}
 	printf("finish::::\n");
-	close(s_sockfd);
+	close(server.sockfd);
 	return 0;
 }
