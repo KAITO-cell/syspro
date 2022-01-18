@@ -1,4 +1,4 @@
-TARGET = server
+TARGET = server client
 CC = /usr/bin/gcc
 CFLAGS = -g -DDEBUG
 SRCS = server.c client.c calc.c util.c 
@@ -16,4 +16,4 @@ client: client.o
 	$(CC) -o $@ $^
 
 clean: 
-	rm -rf $(TARGET) *~.o *.o
+	rm -rf $(TARGET) *~.o $(OBJS) 

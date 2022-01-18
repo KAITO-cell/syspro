@@ -1,6 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h> //socket()
 #include <sys/socket.h> //socket() bind() accept() listen()
-#include <sys/wait.h>
 #include <arpa/inet.h> //struct sockaddr
 #include <netinet/in.h>
 #include <unistd.h>
@@ -31,4 +32,17 @@ socket_data set_server(){
 		exit(EXIT_FAILURE);
 	}
 	return server;
+}
+
+void check_recive_size(int recv_size,int c_sockfd){
+    if(recv_size == -1){
+			perror("recv_size = -1");
+			close(c_sockfd);
+			exit(EXIT_FAILURE);
+	}
+	if(recv_size == 0){
+        	perror("recv_size = 0");
+			close(c_sockfd);
+			exit(EXIT_FAILURE);
+	}
 }

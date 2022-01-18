@@ -11,40 +11,9 @@
 #include <time.h>
 #include "calc.h"
 #include "server.h"
-#define PORT 8080
-#define IP_ADDR "127.0.0.1"
-#define BUF_SIZE 1024
 
-// typedef struct {
-// 	struct sockaddr_in addr;
-// 	int sockfd;
-// } socket_data;
 
-// socket_data set_server(){
-// 	socket_data server;
-// 	if( (server.sockfd = socket(PF_INET, SOCK_STREAM, 0)) < 0){
-// 		perror("socket error");
-// 		close(server.sockfd);
-// 		exit(EXIT_FAILURE);
-// 	}
-// 	memset(&server.addr, 0, sizeof(struct sockaddr_in));
-// 	server.addr.sin_family = PF_INET;
-// 	server.addr.sin_port = htons((unsigned short)PORT);
-// 	server.addr.sin_addr.s_addr = inet_addr(IP_ADDR);
-// 	if( bind(server.sockfd, (const struct sockaddr *)&server, sizeof(server))<0) {
-// 		perror("bind error\n");
-// 		close(server.sockfd);
-// 		exit(EXIT_FAILURE);
-// 	}
 
-// 	//set server listen
-// 	if( listen(server.sockfd, 4) < 0){
-// 		perror("listen error\n");
-// 		close(server.sockfd);
-// 		exit(EXIT_FAILURE);
-// 	}
-// 	return server;
-// }
 int main(int argc, char** argv){
 	////struct sockaddr_in server_addr, client_addr;
 	struct sockaddr_in client_addr;
@@ -73,7 +42,8 @@ int main(int argc, char** argv){
 		//child close server socket
 		//parent close client socket
 		if(pid==0){
-			fprintf(stderr, "child: pid=%d\nchild finish\n",pid);
+			pid_t child_pid = getpid();
+			fprintf(stderr, "child: pid=%d\nchild finish\n",child_;id);
 			//close server socketfd
 			close(server.sockfd);
 			printf("connect from %s: %d\n",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
@@ -95,18 +65,8 @@ int main(int argc, char** argv){
 				//switch(state){
 					//case 0:
 						recv_size = recv(c_sockfd, recv_buf, BUF_SIZE, 0);
-						printf("server in while: recv message: %s\n",recv_buf);
-						if(recv_size == -1){
-							fprintf(stderr, "recv error\n");
-							perror("recv\n");
-							close(c_sockfd);
-							exit(EXIT_FAILURE);
-						}
-						if(recv_size == 0){
-							fprintf(stderr, "in while connection end\n");
-							close(c_sockfd);
-							break;
-						}
+						printf("server in while: recv message from %d: %s\n",getpid(),recv_buf);
+						check_recive_size(recv_size,c_sockfd);
 						send_size = send(c_sockfd, q_statement, q_size, 0);
 						/*if(strcmp(recv_buf, "finish") == 0){
 							if( send_size == -1){
@@ -124,14 +84,16 @@ int main(int argc, char** argv){
 				//recv_size = recv(c_sockfd, recv_buf, BUF_SIZE, 0);
 			}
 			fprintf(stderr, "finish while recv send\n");
+			close(c_sockfd);//finish child process
 		}else{//parent process
 			fprintf(stderr, "parent: pid=%d\n",pid);
 			close(c_sockfd);
 			//wait(status);
 			//if(WIFEXITED(*status)) {
 			//	printf("Exit: %d\n", WEXITSTATUS(*status));
-			}
+			//}
 		}
+
 	}
 	printf("finish::::\n");
 	close(server.sockfd);
