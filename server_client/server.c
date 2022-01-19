@@ -50,19 +50,19 @@ int main(int argc, char** argv){
 			//close server socketfd
 			close(server.sockfd);
 			recv_size = recv(c_sockfd, recv_buf, BUF_SIZE, 0);
-			printf("connect from %s: %d[%s]\n",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port),name);
-			
 			strcpy(name, recv_buf);
+			printf("connect from %s: %d[%s]\n",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port),name);
 			send_size =sprintf(send_buf, "hello [%s]\n",name);
 			send_size = send(c_sockfd, send_buf, send_size, 0);
 			memset(recv_buf, 0, BUF_SIZE);
 		    memset(send_buf, 0, BUF_SIZE);
 			while(1){
 
-				fprintf(stderr,"wait for client\n");
+				//fprintf(stderr,"wait for client\n");
 				recv_size = recv(c_sockfd, recv_buf, BUF_SIZE, 0);
 				
-				printf("message from %d[%s]: %s\n",getpid(),name,recv_buf);
+				//printf("from %d[%s]: %s\n",getpid(),name,recv_buf);
+				printf("from [%s]: %s\n",name,recv_buf);
 				check_recive_size(recv_size,c_sockfd);
 				if(strcmp(recv_buf, "game") == 0) {
 					start_question(c_sockfd);
@@ -79,8 +79,14 @@ int main(int argc, char** argv){
 			
 			fprintf(stderr, "finish while recv send\n");
 			if(strcmp(recv_buf, "exit")==0){
-				//send_size =sprintf(send_buf, "get [%s] from you\n",recv_buf);
-				send_size = send(c_sockfd, recv_buf, recv_size, 0);
+				//send exit
+				//send_size = send(c_sockfd, recv_buf, recv_size, 0);
+				//recv exit response
+				//recv_size = recv(c_sockfd, recv_buf, recv_size, 0);
+				//send goodbymessage
+				send_size =sprintf(send_buf, "goodbye");
+				send_size = send(c_sockfd, send_buf, send_size, 0);
+				printf("%s is logout\n",name);
 				close(c_sockfd);
 				exit(EXIT_SUCCESS);
 			}

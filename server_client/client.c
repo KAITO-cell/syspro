@@ -72,7 +72,14 @@ int main(int argc,char** argv){
         recv_size = recv(sockfd, recv_buf,BUF_SIZE,0);
         check_recive_size(recv_size,sockfd);
         printf("from server:%s\n",recv_buf);
-        if(strcmp(recv_buf, "exit")==0) break;
+        if(strcmp(recv_buf, "goodbye")==0) {
+            //send exit response
+            //send(sockfd,send_buf,send_size,0);
+            //get goodby message
+            recv(sockfd,recv_buf,recv_size,0);
+            printf("%s\n",recv_buf);
+            break;
+        }
         if(strcmp(recv_buf, "game start") == 0){
             printf("[%s] from server\n",recv_buf);
             send_size = sprintf(send_buf,"ready");
