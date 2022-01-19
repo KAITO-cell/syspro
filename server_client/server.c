@@ -23,8 +23,10 @@ int main(int argc, char** argv){
 	socklen_t sin_siz;
 	int recv_size, send_size;
 	char send_buf[BUF_SIZE], recv_buf[BUF_SIZE];
-	server = set_server();
-			
+	server = set_server(argv[1]);
+	sin_siz = sizeof(struct sockaddr_in);
+	memset(recv_buf, 0, BUF_SIZE);
+    memset(send_buf, 0, BUF_SIZE);
 	//accept connection
 	//fork and copy process into child after connected
 	//close parent connection
@@ -42,36 +44,47 @@ int main(int argc, char** argv){
 		//child close server socket
 		//parent close client socket
 		if(pid==0){
+			char name[20];
 			pid_t child_pid = getpid();
-			fprintf(stderr, "child: pid=%d\nchild finish\n",child_pid);
+			fprintf(stderr, "child: pid=%d\n",child_pid);
 			//close server socketfd
 			close(server.sockfd);
-			printf("connect from %s: %d\n",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
-			memset(recv_buf, 0, BUF_SIZE);
-			memset(send_buf, 0, BUF_SIZE);
+			recv_size = recv(c_sockfd, recv_buf, BUF_SIZE, 0);
+			printf("connect from %s: %d[%s]\n",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port),name);
 			
-			while(strcmp(recv_buf, "start") != 0){
+			strcpy(name, recv_buf);
+			send_size =sprintf(send_buf, "hello [%s]\n",name);
+			send_size = send(c_sockfd, send_buf, send_size, 0);
+			memset(recv_buf, 0, BUF_SIZE);
+		    memset(send_buf, 0, BUF_SIZE);
+			while(1){
+
 				fprintf(stderr,"wait for client\n");
 				recv_size = recv(c_sockfd, recv_buf, BUF_SIZE, 0);
-				printf("server in while: recv message from %d: %s\n",getpid(),recv_buf);
+				
+				printf("message from %d[%s]: %s\n",getpid(),name,recv_buf);
 				check_recive_size(recv_size,c_sockfd);
-				//send_size =sprintf(send_buf, "wait for starting\n");
-				send_size = send(c_sockfd, recv_buf, recv_size, 0);
-						/*if(strcmp(recv_buf, "finish") == 0){
-							if( send_size == -1){
-								perror("send error\n");
-								close(c_sockfd);
-								break;
-							}
-							fprintf(stderr, "connection finish\n");
-							close(c_sockfd);
-							break;
-						}*/
+				if(strcmp(recv_buf, "game") == 0) {
+					start_question(c_sockfd);
+				}
+				if(strcmp(recv_buf, "exit")==0) break;
+				send_size =sprintf(send_buf, "get [%s] from you\n",recv_buf);
+				send_size = send(c_sockfd, send_buf, send_size, 0);
+				memset(recv_buf, 0, BUF_SIZE);
+			    memset(send_buf, 0, BUF_SIZE);
+				
 			}
-			fprintf(stdout,"unko");
-			start_question(c_sockfd);
+			// send_size =sprintf(send_buf, "start question");
+        	// send_size =(sockfd,send_buf,send_size, 0);
+			
 			fprintf(stderr, "finish while recv send\n");
-			close(c_sockfd);//finish child process
+			if(strcmp(recv_buf, "exit")==0){
+				//send_size =sprintf(send_buf, "get [%s] from you\n",recv_buf);
+				send_size = send(c_sockfd, recv_buf, recv_size, 0);
+				close(c_sockfd);
+				exit(EXIT_SUCCESS);
+			}
+			//finish child process
 		}else{//parent process
 			fprintf(stderr, "parent: pid=%d\n",pid);
 			close(c_sockfd);
@@ -80,9 +93,9 @@ int main(int argc, char** argv){
 			//	printf("Exit: %d\n", WEXITSTATUS(*status));
 			//}
 		}
-
 	}
 	printf("finish::::\n");
+	close(c_sockfd);
 	close(server.sockfd);
 	return 0;
 }

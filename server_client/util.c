@@ -9,7 +9,8 @@
 #include <string.h>
 #include "util.h"
 #include "calc.h"
-socket_data set_server(){
+
+socket_data set_server(char* argv){
 	socket_data server;
 	if( (server.sockfd = socket(PF_INET, SOCK_STREAM, 0)) < 0){
 		perror("socket error");
@@ -19,7 +20,8 @@ socket_data set_server(){
 	memset(&server.addr, 0, sizeof(struct sockaddr_in));
 	server.addr.sin_family = PF_INET;
 	server.addr.sin_port = htons((unsigned short)PORT);
-	server.addr.sin_addr.s_addr = inet_addr(IP_ADDR);
+	server.addr.sin_addr.s_addr = inet_addr(argv);
+	//net_aton(argv[1], &serv.sin_addr);
 	if( bind(server.sockfd, (const struct sockaddr *)&server, sizeof(server))<0) {
 		perror("bind error\n");
 		close(server.sockfd);
@@ -49,19 +51,29 @@ void check_recive_size(int recv_size,int c_sockfd){
 }
 
 void start_question(int sockfd){
+		fprintf(stdout,"get [start] from client \n");
+		printf("start question\n");
         int send_size,recv_size;
         char recv_buf[BUF_SIZE], send_buf[BUF_SIZE];
         User user;
         user.data.q_number = 0;
         user.data.correct_label = 1;
-	   	send_size =sprintf(send_buf, "start question\n");
-        send_size =(sockfd,send_buf,send_size, 0);
+		memset(recv_buf, 0, BUF_SIZE);
+		memset(send_buf, 0, BUF_SIZE);
+		send_size =sprintf(send_buf, "game start");
+		send_size = send(sockfd, send_buf, send_size, 0);
+		recv_size = recv(sockfd, recv_buf, BUF_SIZE, 0);
+		printf("in question,recv message from %d :%s\n",getpid(),recv_buf);
         while(user.data.q_number < 10){
 	    	int response;
 	    	//char[1024] statement;
             user.question = make_question();
-	    	send_size =sprintf(send_buf, "%d + %d = ?\n",user.question.right,user.question.left);
+			memset(recv_buf, 0, BUF_SIZE);
+			memset(send_buf, 0, BUF_SIZE);
+	    	send_size =sprintf(send_buf, "calculate expression:%d + %d = ?",user.question.right,user.question.left);
             send_size =(sockfd,send_buf,send_size, 0);
+			printf("send[%s]\n",send_buf);
+			sleep(10);
             recv_size = recv(sockfd, recv_buf, BUF_SIZE, 0);
             fprintf(stdout,"the answer from client is %s\n",recv_buf);
 			check_recive_size(recv_size,sockfd);
