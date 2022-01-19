@@ -7,7 +7,8 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
-#include "server.h"
+#include "util.h"
+#include "calc.h"
 socket_data set_server(){
 	socket_data server;
 	if( (server.sockfd = socket(PF_INET, SOCK_STREAM, 0)) < 0){
@@ -46,3 +47,31 @@ void check_recive_size(int recv_size,int c_sockfd){
 			exit(EXIT_FAILURE);
 	}
 }
+
+void start_question(int sockfd){
+        int send_size,recv_size;
+        char recv_buf[BUF_SIZE], send_buf[BUF_SIZE];
+        User user;
+        user.data.q_number = 0;
+        user.data.correct_label = 1;
+	   	send_size =sprintf(send_buf, "start question\n");
+        send_size =(sockfd,send_buf,send_size, 0);
+        while(user.data.q_number < 10){
+	    	int response;
+	    	//char[1024] statement;
+            user.question = make_question();
+	    	send_size =sprintf(send_buf, "%d + %d = ?\n",user.question.right,user.question.left);
+            send_size =(sockfd,send_buf,send_size, 0);
+            recv_size = recv(sockfd, recv_buf, BUF_SIZE, 0);
+            fprintf(stdout,"the answer from client is %s\n",recv_buf);
+			check_recive_size(recv_size,sockfd);
+	    	response = atoi(recv_buf);
+	    	user.data = eval_answer(response,user);
+        }
+	send_size =sprintf(send_buf, "question finish.\n faultcount:%d\n",user.data.fault_count);
+        send_size =(sockfd,send_buf,send_size, 0);
+	//return user
+}
+
+
+
