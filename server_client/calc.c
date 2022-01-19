@@ -10,6 +10,7 @@ Question make_question(){
 	srand((unsigned int)time(NULL));
        	quest.right = 1 + rand() % 9;
 	quest.answer = quest.left+quest.right;
+	quest.statement_size = sprintf(quest.statement, "%d + %d = ?",quest.left,quest.right);
 	return quest;
 }
 Data eval_answer(int recv,int fault_count,Question q,int que_number){

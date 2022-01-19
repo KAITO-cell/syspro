@@ -1,18 +1,28 @@
 #ifndef _CALC_H__
 #define _CALC_H__
 
-typedef struct {
-	int right;
-	int left;
-	int answer;
-	char* sentence;
-} Question;
+typedef struct Data_tag Data;
+typedef struct Question_tag Question;
+typedef struct User_tag User;
 
-typedef struct {
+struct Data_tag{
 	int q_number;
 	int fault_count;
 	int correct_label;
-}Data;
+};
+
+struct Question_tag{
+	int right;
+	int left;
+	int answer;
+	char* statement;
+	int statement_size;
+};
+struct User_tag{
+	Data data;
+	Question question;
+};
+
 
 /*typedef struct{
     int number;

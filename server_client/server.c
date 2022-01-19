@@ -43,19 +43,21 @@ int main(int argc, char** argv){
 		//parent close client socket
 		if(pid==0){
 			pid_t child_pid = getpid();
-			fprintf(stderr, "child: pid=%d\nchild finish\n",child_;id);
+			fprintf(stderr, "child: pid=%d\nchild finish\n",child_pid);
 			//close server socketfd
 			close(server.sockfd);
 			printf("connect from %s: %d\n",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 			memset(recv_buf, 0, BUF_SIZE);
 			memset(send_buf, 0, BUF_SIZE);
 			
-			Question question;
-			Data d;
-			d.correct_label = 1;
+			User user;
+			user.data.q_number = 0;
+			user.question = make_question();
+			user.data.correct_label = 1;
+			//d.correct_label = 1;
 			char q_statement[1024];
 			int q_size;
-			q_size=sprintf( q_statement, "%d + %d = ?\n",question.left,question.right);
+			q_size = sprintf( user.question.statement, "%d + %d = ?\n",user.question.left,user.question.right);
 			//fprintf(stderr,"%s\n",q_statement);
 			//recv_size = recv(c_sockfd, recv_buf, BUF_SIZE, 0);
 			//printf("server first: recv message: %s\n",recv_buf);
@@ -67,7 +69,7 @@ int main(int argc, char** argv){
 						recv_size = recv(c_sockfd, recv_buf, BUF_SIZE, 0);
 						printf("server in while: recv message from %d: %s\n",getpid(),recv_buf);
 						check_recive_size(recv_size,c_sockfd);
-						send_size = send(c_sockfd, q_statement, q_size, 0);
+						send_size = send(c_sockfd, user.question.statement, q_size, 0);
 						/*if(strcmp(recv_buf, "finish") == 0){
 							if( send_size == -1){
 								perror("send error\n");
