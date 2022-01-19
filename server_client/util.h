@@ -9,8 +9,7 @@ typedef struct {
 	int sockfd;
 } socket_data;
 
-socket_data set_server();
+socket_data set_server(char* argv);
 void check_recive_size(int recv_size,int c_sockfd);
 void start_question(int sockfd);
 #endif
-
