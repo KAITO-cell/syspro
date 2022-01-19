@@ -10,19 +10,16 @@ Question make_question(){
 	srand((unsigned int)time(NULL));
        	quest.right = 1 + rand() % 9;
 	quest.answer = quest.left+quest.right;
-	quest.statement_size = sprintf(quest.statement, "%d + %d = ?",quest.left,quest.right);
 	return quest;
 }
-Data eval_answer(int recv,int fault_count,Question q,int que_number){
-    Data d;
-    if(recv == q.answer){
-        d.q_number = que_number + 1;
-        d.fault_count = fault_count;
+Data eval_answer(int recv,User user){
+    Data d = user.data;
+    if(recv == user.question.answer){
+        d.q_number = user.data.q_number + 1;
         d.correct_label = 1;
     }else{
         //printf("正しい答えを入力してください\n");
-        d.q_number = que_number;
-        d.fault_count = fault_count + 1;
+        d.fault_count = user.data.fault_count + 1;
         d.correct_label = 0;
     }
     return d;

@@ -12,7 +12,7 @@ all: $(TARGET)
 server:	server.o calc.o util.o
 	$(CC) -o $@ $^
 
-client: client.o
+client: client.o util.o calc.o
 	$(CC) -o $@ $^
 
 clean: 

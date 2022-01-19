@@ -15,8 +15,6 @@ struct Question_tag{
 	int right;
 	int left;
 	int answer;
-	char* statement;
-	int statement_size;
 };
 struct User_tag{
 	Data data;
@@ -31,6 +29,6 @@ struct User_tag{
 } Count;
 */
 Question make_question(void);
-Data eval_answer(int recv,int fault_count,Question q,int que_number);
+Data eval_answer(int recv,User user);
 #endif
 

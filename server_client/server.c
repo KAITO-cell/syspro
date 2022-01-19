@@ -10,7 +10,7 @@
 #include <string.h>
 #include <time.h>
 #include "calc.h"
-#include "server.h"
+#include "util.h"
 
 
 
@@ -50,26 +50,13 @@ int main(int argc, char** argv){
 			memset(recv_buf, 0, BUF_SIZE);
 			memset(send_buf, 0, BUF_SIZE);
 			
-			User user;
-			user.data.q_number = 0;
-			user.question = make_question();
-			user.data.correct_label = 1;
-			//d.correct_label = 1;
-			char q_statement[1024];
-			int q_size;
-			q_size = sprintf( user.question.statement, "%d + %d = ?\n",user.question.left,user.question.right);
-			//fprintf(stderr,"%s\n",q_statement);
-			//recv_size = recv(c_sockfd, recv_buf, BUF_SIZE, 0);
-			//printf("server first: recv message: %s\n",recv_buf);
-			int state = 0;
-			while(strcmp(recv_buf, "finish") != 0){
+			while(strcmp(recv_buf, "start") != 0){
 				fprintf(stderr,"wait for client\n");
-				//switch(state){
-					//case 0:
-						recv_size = recv(c_sockfd, recv_buf, BUF_SIZE, 0);
-						printf("server in while: recv message from %d: %s\n",getpid(),recv_buf);
-						check_recive_size(recv_size,c_sockfd);
-						send_size = send(c_sockfd, user.question.statement, q_size, 0);
+				recv_size = recv(c_sockfd, recv_buf, BUF_SIZE, 0);
+				printf("server in while: recv message from %d: %s\n",getpid(),recv_buf);
+				check_recive_size(recv_size,c_sockfd);
+				//send_size =sprintf(send_buf, "wait for starting\n");
+				send_size = send(c_sockfd, recv_buf, recv_size, 0);
 						/*if(strcmp(recv_buf, "finish") == 0){
 							if( send_size == -1){
 								perror("send error\n");
@@ -80,11 +67,9 @@ int main(int argc, char** argv){
 							close(c_sockfd);
 							break;
 						}*/
-					//	break;
-					//}
-					//case 1:
-				//recv_size = recv(c_sockfd, recv_buf, BUF_SIZE, 0);
 			}
+			fprintf(stdout,"unko");
+			start_question(c_sockfd);
 			fprintf(stderr, "finish while recv send\n");
 			close(c_sockfd);//finish child process
 		}else{//parent process

@@ -6,10 +6,11 @@
 #include <unistd.h>
 #include <errno.h>
 #include <stdlib.h>
-
-#define PORT 8080
-#define S_ADDR "127.0.0.1"
-#define BUF_SIZE 1024
+#include "util.h"
+#include "calc.h"
+// #define PORT 8080
+// #define S_ADDR "127.0.0.1"
+// #define BUF_SIZE 1024
 
 int main(void){
     int sockfd;
@@ -28,7 +29,7 @@ int main(void){
     memset(&addr, 0, sizeof(struct sockaddr_in));
     addr.sin_family = AF_INET;
     addr.sin_port = htons((unsigned short)PORT);
-    addr.sin_addr.s_addr = inet_addr(S_ADDR);
+    addr.sin_addr.s_addr = inet_addr(IP_ADDR);
 
     /* サーバーに接続要求送信 */
     fprintf(stdout,"Start connect...\n");
@@ -48,29 +49,34 @@ int main(void){
         scanf("%s", send_buf);
 
         //send message
-        
-
-        if((send_size = send(sockfd, send_buf,strlen(send_buf),0)) == -1){
+        send_size = send(sockfd, send_buf,strlen(send_buf),0);//
+        printf("%s\n",send_buf);
+        if(send_size == -1){
             perror("send error");
+            close(sockfd);
             break;
         }
         //recieve response from server
-       
-        if(( recv_size = recv(sockfd, &recv_buf,BUF_SIZE,0))==-1){
-            fprintf(stderr,"recv error\n");
-            break;
-        }else if(recv_size == 0){
-            fprintf(stderr,"connection ended\n");
-            break;
-        } else {
-		fprintf(stderr,"recv message: %s\n",recv_buf);
+        printf("wait revive\n");
+        recv_size = recv(sockfd, &recv_buf,BUF_SIZE,0);//wait for start問題
+        printf("%s\n",recv_buf);
+        check_recive_size(recv_size,sockfd);
+        if(strcmp(recv_buf, "start question") != 0){
 
-	}
-	//break;
+            while(strcmp(recv_buf, "question finish.") != 0){
+                recv_size = recv(sockfd, &recv_buf,BUF_SIZE,0);
+                fprintf(stderr,"recv message: %s\n",recv_buf);
+                scanf("%s", send_buf);
+                send_size = send(sockfd, send_buf,strlen(send_buf),0);//回答
+            }
+
+        }
+
     }
-
+    //start question
+    fprintf(stderr,"recv message: %s\n",recv_buf);
+	//break;
     /* ソケット通信をクローズ *///socket discriptor close
     close(sockfd);
-
     return 0;
 }
