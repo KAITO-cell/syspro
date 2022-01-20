@@ -20,11 +20,14 @@ int main(int argc, char** argv){
 	socklen_t sin_siz;
 	int recv_size, send_size;
 	char send_buf[BUF_SIZE], recv_buf[BUF_SIZE];
-	server = set_server(argv[1]);
+	server = set_server(argv);
 	sin_siz = sizeof(struct sockaddr_in);
 	memset(recv_buf, 0, BUF_SIZE);
-    	memset(send_buf, 0, BUF_SIZE);
-
+    memset(send_buf, 0, BUF_SIZE);
+    if (argc != 3) {
+        printf("Usage: ./prog host port¥n");
+        exit(1);
+    }
 	//accept connection
 	//fork and copy process into child after connected
 	//close parent connection
@@ -53,6 +56,7 @@ int main(int argc, char** argv){
 			printf("connect from %s: %d[%s]\n",inet_ntoa(client.addr.sin_addr), ntohs(client.addr.sin_port),name);
 			send_size =sprintf(send_buf, "hello [%s]\n",name);
 			send_size = send(client.sockfd, send_buf, send_size, 0);
+			check_send_size(send_size,client.sockfd);
 			memset(recv_buf, 0, BUF_SIZE);
 		    memset(send_buf, 0, BUF_SIZE);
 			
@@ -63,39 +67,58 @@ int main(int argc, char** argv){
 				char* c_time = (char*)malloc(sizeof(char)*20);
 				current_time(c_time);
 				recv_size = recv(client.sockfd, recv_buf, BUF_SIZE, 0);
-				
-				//printf("from %d[%s]: %s\n",getpid(),name,recv_buf);
-				//char* c_time;
-				//current_time(c_time);
-				printf("%s [%s]: %s\n",c_time,name,recv_buf);
 				check_recive_size(recv_size,client.sockfd);
+				//printf("from %d[%s]: %s\n",getpid(),name,recv_buf);
+				printf("%s [%s]: %s\n",c_time,name,recv_buf);
+
+
 				if(strcmp(recv_buf, "game") == 0) {
-					start_question(client.sockfd);
+					//start_question(client.sockfd);
+						fprintf(stdout,"the answer from client is %s\n",recv_buf);
+						send_size =sprintf(send_buf, "game start");
+            			send_size =(client.sockfd,send_buf,send_size, 0);
+						check_send_size(send_size,client.sockfd);
+						fprintf(stdout,"the answer from client is %s\n",send_buf);
+						memset(recv_buf, 0, BUF_SIZE);
+		   				memset(send_buf, 0, BUF_SIZE);
+						recv_size = recv(client.sockfd, recv_buf, BUF_SIZE, 0);//ready
+						fprintf(stdout,"the answer from client is %s\n",recv_buf);
+						check_recive_size(recv_size,client.sockfd);
+						
+					// 	User user;
+					//     user.data.q_number = 0;
+        			// 	user.data.correct_label = 1;
+					// while(1){
+					// 	if(user.data.correct_label == 1)
+					// 		user.question = make_question();
+					// 		memset(recv_buf, 0, BUF_SIZE);
+					// 	// memset(send_buf, 0, BUF_SIZE);
+	    			// 	send_size =sprintf(send_buf, "calculate expression:%d + %d = ?", user.question.right, user.question.left);
+            		// 	send_size =(client.sockfd,send_buf,send_size, 0);
+
+					// 	//答えもらう
+					// 	recv_size = recv(client.sockfd, recv_buf, BUF_SIZE, 0);
+				    //     fprintf(stdout,"the answer from client is %s\n",recv_buf);
+					// 	check_recive_size(recv_size,client.sockfd);
+	    			// 	int response = atoi(recv_buf);
+	    			// 	user.data = eval_answer(response,user);
+
+					// }
+
 				}
-				if(strcmp(recv_buf, "goodbye")==0) break;
+
+				if(strcmp(recv_buf, "goodbye")==0){
+					printf("%s is logout\n",name);
+					close(client.sockfd);
+					exit(EXIT_SUCCESS);
+				}
 				send_size =sprintf(send_buf, "get [%s] from you\n",recv_buf);
 				send_size = send(client.sockfd, send_buf, send_size, 0);
 				memset(recv_buf, 0, BUF_SIZE);
-			    memset(send_buf, 0, BUF_SIZE);
-				
+			    memset(send_buf, 0, BUF_SIZE);	
 			}
-			// send_size =sprintf(send_buf, "start question");
         	// send_size =(sockfd,send_buf,send_size, 0);
-			
 			//fprintf(stderr, "finish while communicate\n");
-			if(strcmp(recv_buf, "goodbye")==0){
-				//send exit
-				//send_size = send(c_sockfd, recv_buf, recv_size, 0);
-				//recv exit response
-				//recv_size = recv(c_sockfd, recv_buf, recv_size, 0);
-				//send goodbymessage
-				send_size =sprintf(send_buf, "goodbye");
-				send_size = send(client.sockfd, send_buf, send_size, 0);
-				printf("%s is logout\n",name);
-				close(client.sockfd);
-				exit(EXIT_SUCCESS);
-			}
-			//finish child process
 		}else{//parent process
 			fprintf(stderr, "parent: pid=%d\n",pid);
 			close(client.sockfd);

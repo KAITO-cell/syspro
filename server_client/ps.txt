@@ -1,0 +1,17 @@
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+kaito        9  0.0  0.1  23792  5348 pts/0    Ss   17:05   0:00 -bash
+kaito       62  0.0  0.0  22224  3388 pts/0    S+   17:11   0:00 tmux
+kaito       64  0.0  0.0  30864  3868 ?        Ss   17:11   0:00 tmux
+kaito       65  0.0  0.1  23676  5112 pts/1    Ss   17:11   0:00 -bash
+kaito       96  0.0  0.0   4516   824 pts/1    S+   17:11   0:00 ./server 127.0.0.1
+kaito       98  0.0  0.0      0     0 pts/1    Z+   17:11   0:00 [server] <defunct>
+kaito      100  0.0  0.0      0     0 pts/1    Z+   17:11   0:00 [server] <defunct>
+kaito      118  0.0  0.0      0     0 pts/1    Z+   17:12   0:00 [server] <defunct>
+kaito      121  0.0  0.1  23644  5188 pts/2    Ss+  17:13   0:00 -bash
+kaito      136  0.0  0.1  23644  4948 pts/3    Ss+  17:13   0:00 -bash
+kaito      151  0.0  0.1  23644  5156 pts/4    Ss   17:13   0:00 -bash
+kaito      166  0.0  0.0   4516   828 pts/4    S+   17:13   0:00 ./client 127.0.0.1
+kaito      167  0.0  0.0   4516    88 pts/1    S+   17:13   0:00 ./server 127.0.0.1
+kaito      184  0.0  0.1  23644  5136 pts/5    Ss+  17:14   0:00 -bash
+kaito      199  0.0  0.1  23644  5080 pts/6    Ss   17:14   0:00 -bash
+kaito      218  0.0  0.0  38396  3308 pts/6    R+   17:15   0:00 ps xu
