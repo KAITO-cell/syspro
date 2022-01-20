@@ -12,4 +12,5 @@ typedef struct {
 socket_data set_server(char* argv);
 void check_recive_size(int recv_size,int c_sockfd);
 void start_question(int sockfd);
+void current_time(char* c_time);
 #endif

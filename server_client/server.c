@@ -15,19 +15,16 @@
 
 
 int main(int argc, char** argv){
-	////struct sockaddr_in server_addr, client_addr;
-	struct sockaddr_in client_addr;
 	socket_data server;
 	socket_data client;
-	int c_sockfd;
-	int pid;
 	socklen_t sin_siz;
 	int recv_size, send_size;
 	char send_buf[BUF_SIZE], recv_buf[BUF_SIZE];
 	server = set_server(argv[1]);
 	sin_siz = sizeof(struct sockaddr_in);
 	memset(recv_buf, 0, BUF_SIZE);
-    memset(send_buf, 0, BUF_SIZE);
+    	memset(send_buf, 0, BUF_SIZE);
+
 	//accept connection
 	//fork and copy process into child after connected
 	//close parent connection
@@ -41,6 +38,7 @@ int main(int argc, char** argv){
 			close(client.sockfd);
 			exit(EXIT_FAILURE);
 		}
+		int pid; 
 		pid = fork();
 		//child close server socket
 		//parent close client socket
@@ -57,13 +55,19 @@ int main(int argc, char** argv){
 			send_size = send(client.sockfd, send_buf, send_size, 0);
 			memset(recv_buf, 0, BUF_SIZE);
 		    memset(send_buf, 0, BUF_SIZE);
+			
 			while(1){
 
 				//fprintf(stderr,"wait for client\n");
+				
+				char* c_time = (char*)malloc(sizeof(char)*20);
+				current_time(c_time);
 				recv_size = recv(client.sockfd, recv_buf, BUF_SIZE, 0);
 				
 				//printf("from %d[%s]: %s\n",getpid(),name,recv_buf);
-				printf("[%s]: %s\n",name,recv_buf);
+				//char* c_time;
+				//current_time(c_time);
+				printf("%s [%s]: %s\n",c_time,name,recv_buf);
 				check_recive_size(recv_size,client.sockfd);
 				if(strcmp(recv_buf, "game") == 0) {
 					start_question(client.sockfd);
@@ -88,7 +92,7 @@ int main(int argc, char** argv){
 				send_size =sprintf(send_buf, "goodbye");
 				send_size = send(client.sockfd, send_buf, send_size, 0);
 				printf("%s is logout\n",name);
-				close(c_sockfd);
+				close(client.sockfd);
 				exit(EXIT_SUCCESS);
 			}
 			//finish child process

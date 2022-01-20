@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
+#include <time.h>
 #include "util.h"
 #include "calc.h"
 
@@ -70,7 +71,7 @@ void start_question(int sockfd){
             user.question = make_question();
 			memset(recv_buf, 0, BUF_SIZE);
 			memset(send_buf, 0, BUF_SIZE);
-	    	send_size =sprintf(send_buf, "calculate expression:%d + %d = ?",user.question.right,user.question.left);
+	    	send_size =sprintf(send_buf, "calculate expression:%d + %d = ?", user.question.right, user.question.left);
             send_size =(sockfd,send_buf,send_size, 0);
 			printf("send[%s]\n",send_buf);
 			sleep(10);
@@ -84,6 +85,39 @@ void start_question(int sockfd){
         send_size =(sockfd,send_buf,send_size, 0);
 	//return user
 }
+
+void current_time(char* c_time){
+	time_t t = time(NULL);
+	struct tm *local= localtime(&t);
+	int year, month, day, hour, min, sec;
+	year = local->tm_year+1900;
+	month = local->tm_mon+1;
+	day = local->tm_mday;
+	hour = local->tm_hour;
+	min = local->tm_min;
+	sec = local->tm_sec;
+	sprintf(c_time,"%04d/%02d/%02d %02d:%02d:%02d",year,month,day,hour,min,sec);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
